@@ -1,0 +1,21 @@
+language: haskell
+sudo: false
+ghc: 7.8
+before_install:
+ - openssl aes-256-cbc -K $encrypted_0374665eeb8b_key -iv $encrypted_0374665eeb8b_iv -in id_rsa.polysquare-builder.enc -out id_rsa.polysquare-builder -d
+after_success:
+ - find . -type f
+ - chmod 600 id_rsa.polysquare-builder
+ - mkdir -p ~/.ssh
+ - mv id_rsa.polysquare-builder.pub ~/.ssh/id_rsa.pub
+ - mv id_rsa.polysquare-builder ~/.ssh/id_rsa
+ - git clone git@github.com:polysquare-builds/polysquare-haskell-builds
+ - host_dir=$(curl -LSs "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" | bash)
+ - mkdir -p "polysquare-haskell-builds/${host_dir}"
+ - cp "dist/build/shellcheck/shellcheck" "polysquare-haskell-builds/${host_dir}/shellcheck"
+ - cd polysquare-haskell-builds
+ - git add "${host_dir}/shellcheck"
+ - git config user.email "polysquare.builder@gmail.com"
+ - git config user.name "Polysquare Automated Builder"
+ - git commit -a -m "Automated update of shellcheck"
+ - git push origin master
